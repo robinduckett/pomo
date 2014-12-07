@@ -5,14 +5,17 @@ function Actor(game) {
     this.x = 64;
     this.y = 64;
 
+    this.start = {x: this.x, y: this.y};
+
     this.dir = 2;
-    this.anim = 'walk';
+    this.anim = 'idle';
     this.frame = 0;
 
-    this.distance = Math.round(Math.random()*20);
+    this.moving = false;
 
     this.speed = {
-        walk: 3.75
+        walk: 1.6,
+        run: 3.2
     };
 
     this.sprite = {
@@ -30,56 +33,93 @@ function Actor(game) {
             [ 10, 0, 2, 0 ], // up, // 0
             [  3, 6, 9, 6 ], // lft // 1
             [ 11, 5, 8, 5 ], // dwn // 2
-            [  7, 1, 4, 1 ], // rgt // 3
+            [  7, 1, 4, 1 ] // rgt // 3
         ]
     };
 }
 
 Actor.prototype.tick = function(ticks) {
     var dirgo = [[0, -1], [-1, 0], [0, 1], [1, 0]];
-//
-//    if (ticks % this.distance === 0) {
-//        this.dir = Math.floor(Math.random() * 3);
-//        this.distance = 1 + Math.round(Math.random()*20);
-//    }
-//
-//    var border = [
-//        this.y + dirgo[0][1] * 2 < 0,
-//        this.x + dirgo[1][0] * 2 < 0,
-//        this.y + dirgo[2][1] * 2 > 600 - 32,
-//        this.x + dirgo[3][0] * 2 > 800 - 32
-//    ];
-//
-//    for (var d = 0; d < 4; d++) {
-//        if (border[d]) {
-//            this.distance = 19;
-//            this.dir = (d + 2) % 4;
-//
-//            break;
-//        }
-//    }
-//
-//    this.x += dirgo[this.dir][0];
-//    this.y += dirgo[this.dir][1];
 
-    if (ticks % 60 === 0) {
-        this.dir = (this.dir + 1) % 4;
+    var keys = KeyboardJS.activeKeys();
+
+    var check = ["up", "left", "down", "right"];
+
+    var runWalk = keys.indexOf('shift') > -1 ? 'run' : 'walk';
+
+    if (this.moving === false) {
+        if (keys.length > 0) {
+            var key = null;
+
+            if (keys[0] === 'shift') {
+                key = keys[1];
+            } else {
+                key = keys[0];
+            }
+
+            if (check.indexOf(key) > -1) {
+                this.dir = check.indexOf(key);
+
+                this.start.x = this.x;
+                this.start.y = this.y;
+
+                this.moving = true;
+            }
+        }
     }
 
-    if (ticks % 6 === 0) {
-        this.x += dirgo[this.dir][0] * (16 / 10);
-        this.y += dirgo[this.dir][1] * (16 / 10);
+    if (this.moving === true) {
+        this.setAnim('walk');
+
+        this.x += dirgo[this.dir][0] * this.speed[runWalk] / 2;
+        this.y += dirgo[this.dir][1] * this.speed[runWalk] / 2;
+
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+    } else {
+        this.setAnim('idle');
+    }
+
+    var dx = this.start.x - this.x,
+        dy = this.start.y - this.y;
+
+    var d2 = Math.sqrt((dx * dx) + (dy * dy));
+
+    this.status = keys.join(' ') + ' ' + runWalk;
+
+    this.moving = d2 > 0 && d2 < 16;
+
+    this.render();
+};
+
+Actor.prototype.setAnim = function(anim) {
+    if (this.anim !== anim) {
+        this.anim = anim;
+        var frames = this.anims[this.anim][this.dir].length;
+
+        if (this.frame > frames) {
+            this.frame = 0;
+        }
     }
 };
 
-Actor.prototype.render = function(ctx, ticks) {
-    var frames = this.anims[this.anim][this.dir].length;
+Actor.prototype.render = function() {
+    var ctx = this.game.ctx;
+    var ticks = this.game.ticks;
 
-    if (ticks % (60 / 6) === 0) {
+    var sheet = this.anims[this.anim][this.dir];
+
+    var frames = sheet.length;
+
+    if (ticks % 6 === 0) {
         this.frame = (this.frame + 1) % frames;
     }
 
-    var animation = this.anims[this.anim][this.dir][this.frame];
+    if (this.frame > frames) {
+        this.frame = frames - 1;
+    }
+
+    var animation = sheet[this.frame];
 
     var xpos = animation % 3;
     var ypos = Math.floor(animation / 3);
@@ -93,35 +133,20 @@ Actor.prototype.render = function(ctx, ticks) {
         sy + (ypos * this.sprite.height),
         this.sprite.width,
         this.sprite.height,
-        Math.floor(this.x),
-        Math.floor(this.y),
+        Math.floor(this.x) - (this.sprite.width / 4),
+        Math.floor(this.y) - (this.sprite.height / 2),
         this.sprite.width,
         this.sprite.height
     );
 
-    ctx.textAlign = 'center';
-
-    ctx.fillStyle = '#000';
-
-    ctx.font = '10px Helvetica';
-
-    for (var i = 0; i < 4; i++) {
-        var pos = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-
-        ctx.fillText([
-            this.name
-        ].join(' '), this.x + (this.sprite.width / 2) + pos[i][0], this.y + this.sprite.height + 8 + pos[i][1]);
-    }
-
-    ctx.fillStyle = '#fff';
-
-    ctx.fillText([
-        this.name
-    ].join(' '), this.x + (this.sprite.width / 2), this.y + this.sprite.height + 8);
-
     if (this.name === 'npc0') {
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#000';
+        ctx.font = '100 16px Helvetica';
+        ctx.fillText(this.status, 400, 20, 800);
+
         ctx.strokeStyle = '#f00';
-        ctx.strokeRect(Math.ceil(this.x) - 0.5, Math.ceil(this.y) - 0.5, this.sprite.width, this.sprite.height);
+        ctx.strokeRect(Math.ceil(this.x) - 0.5, Math.ceil(this.y) - 0.5, this.sprite.width / 2, this.sprite.height / 2);
         ctx.strokeStyle = '#000';
     }
 };
