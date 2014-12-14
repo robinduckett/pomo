@@ -7,10 +7,10 @@
         <script src="./js/vnd/stats.min.js"></script>
         <script src="./js/Game.js"></script>
         <script src="./js/Actor.js"></script>
+        <script src="./js/Player.js"></script>
         <script src="./js/Monster.js"></script>
         <script>
             window.addEventListener("keydown", function(e) {
-                // space and arrow keys
                 if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
                     e.preventDefault();
                 }
@@ -38,6 +38,12 @@
                     char: i % 80
                 });
             }
+
+            game.add('player', 'Robin', {
+                x: 64,
+                y: 64,
+                char: 50
+            });
 
             game.ready(function() {
                 var canvas = document.getElementById('c');

@@ -1,4 +1,4 @@
-function Actor(game) {
+function Player(game) {
     this.game = game;
     this.char = 0;
 
@@ -38,29 +38,38 @@ function Actor(game) {
     };
 }
 
-Actor.prototype.tick = function(ticks) {
+Player.prototype.tick = function(ticks) {
     var dirgo = [[0, -1], [-1, 0], [0, 1], [1, 0]];
 
-    //if (this.moving === false) {
-    //    if (keys.length > 0) {
-    //        var key = null;
-    //
-    //        if (keys[0] === 'shift') {
-    //            key = keys[1];
-    //        } else {
-    //            key = keys[0];
-    //        }
-    //
-    //        if (check.indexOf(key) > -1) {
-    //            this.dir = check.indexOf(key);
-    //
-    //            this.start.x = this.x;
-    //            this.start.y = this.y;
-    //
-    //            this.moving = true;
-    //        }
-    //    }
-    //}
+    var keys = KeyboardJS.activeKeys();
+
+    var check = ["up", "left", "down", "right"];
+
+    var runWalk = keys.indexOf('shift') > -1 ? 'run' : 'walk';
+
+    if (this.moving === false && ticks % (this.game.fps / 6) === 0) {
+        if (keys.length > 0) {
+            var key = null;
+
+            if (keys[0] === 'shift') {
+                key = keys[1];
+            } else {
+                key = keys[0];
+            }
+
+            if (check.indexOf(key) > -1) {
+                var olddir = this.dir;
+                this.dir = check.indexOf(key);
+
+                this.start.x = this.x;
+                this.start.y = this.y;
+
+                if (this.dir === olddir) {
+                    this.moving = true;
+                }
+            }
+        }
+    }
 
     if (this.moving === true) {
         this.setAnim('walk');
@@ -79,12 +88,14 @@ Actor.prototype.tick = function(ticks) {
 
     var d2 = Math.sqrt((dx * dx) + (dy * dy));
 
+    this.status = keys.join(' ') + ' ' + runWalk;
+
     this.moving = d2 > 0 && d2 < 16;
 
     this.render();
 };
 
-Actor.prototype.setAnim = function(anim) {
+Player.prototype.setAnim = function(anim) {
     if (this.anim !== anim) {
         this.anim = anim;
         var frames = this.anims[this.anim][this.dir].length;
@@ -95,7 +106,7 @@ Actor.prototype.setAnim = function(anim) {
     }
 };
 
-Actor.prototype.render = function() {
+Player.prototype.render = function() {
     var ctx = this.game.ctx;
     var ticks = this.game.ticks;
 
@@ -118,10 +129,10 @@ Actor.prototype.render = function() {
 
     var sx = (this.char % 10) * this.sprite.width * 3;
     var sy = Math.floor(this.char / 10) * this.sprite.height * 4;
-    //
-    //ctx.strokeStyle = '#f00';
-    //ctx.strokeRect(Math.ceil(this.x) - 0.5, Math.ceil(this.y) - 0.5, this.sprite.width / 2, this.sprite.height / 2);
-    //ctx.strokeStyle = '#000';
+
+    ctx.strokeStyle = '#f00';
+    ctx.strokeRect(Math.ceil(this.x) - 0.5, Math.ceil(this.y) - 0.5, this.sprite.width / 2, this.sprite.height / 2);
+    ctx.strokeStyle = '#000';
 
     ctx.drawImage(
         this.game.images.actors,

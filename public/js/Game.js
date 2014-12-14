@@ -119,6 +119,16 @@ Game.prototype.renderMap = function() {
 
 Game.prototype.add = function(type, name, opts) {
     switch (type) {
+        case 'player':
+            var player = new Player(this);
+            player.x = opts.x;
+            player.y = opts.y;
+            player.char = opts.char;
+            player.name = name;
+
+            this.actors.push(player);
+            break;
+
         case 'actor':
             var actor = new Actor(this);
 
