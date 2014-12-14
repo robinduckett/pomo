@@ -47,7 +47,7 @@ Player.prototype.tick = function(ticks) {
 
     var runWalk = keys.indexOf('shift') > -1 ? 'run' : 'walk';
 
-    if (this.moving === false && ticks % (this.game.fps / 6) === 0) {
+    if (this.moving === false) {
         if (keys.length > 0) {
             var key = null;
 
@@ -58,15 +58,11 @@ Player.prototype.tick = function(ticks) {
             }
 
             if (check.indexOf(key) > -1) {
-                var olddir = this.dir;
                 this.dir = check.indexOf(key);
 
                 this.start.x = this.x;
                 this.start.y = this.y;
-
-                if (this.dir === olddir) {
-                    this.moving = true;
-                }
+                this.moving = true;
             }
         }
     }
@@ -98,11 +94,7 @@ Player.prototype.tick = function(ticks) {
 Player.prototype.setAnim = function(anim) {
     if (this.anim !== anim) {
         this.anim = anim;
-        var frames = this.anims[this.anim][this.dir].length;
-
-        if (this.frame > frames) {
-            this.frame = 0;
-        }
+        this.frame = 0;
     }
 };
 
