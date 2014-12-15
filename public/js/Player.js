@@ -10,6 +10,7 @@ function Player(game) {
     this.dir = 2;
     this.anim = 'idle';
     this.frame = 0;
+    this.visible = true;
 
     this.moving = false;
 
@@ -122,19 +123,17 @@ Player.prototype.render = function() {
     var sx = (this.char % 10) * this.sprite.width * 3;
     var sy = Math.floor(this.char / 10) * this.sprite.height * 4;
 
-    ctx.strokeStyle = '#f00';
-    ctx.strokeRect(Math.ceil(this.x) - 0.5, Math.ceil(this.y) - 0.5, this.sprite.width / 2, this.sprite.height / 2);
-    ctx.strokeStyle = '#000';
-
-    ctx.drawImage(
-        this.game.images.actors,
-        sx + (xpos * this.sprite.width),
-        sy + (ypos * this.sprite.height),
-        this.sprite.width,
-        this.sprite.height,
-        Math.round(this.x) - (this.sprite.width / 4),
-        Math.round(this.y) - (this.sprite.height / 2),
-        this.sprite.width,
-        this.sprite.height
-    );
+    if (this.visible === true) {
+        ctx.drawImage(
+            this.game.images.actors,
+            sx + (xpos * this.sprite.width),
+            sy + (ypos * this.sprite.height),
+            this.sprite.width,
+            this.sprite.height,
+            Math.round(this.x) - (this.sprite.width / 4),
+            Math.round(this.y) - (this.sprite.height / 2),
+            this.sprite.width,
+            this.sprite.height
+        );
+    }
 };
