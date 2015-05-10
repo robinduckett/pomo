@@ -1,60 +1,72 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+    <!--<head lang="en">-->
+        <!--<meta charset="UTF-8">-->
+        <!--<title>Pomo</title>-->
+        <!--<script src="./js/vnd/keyboard.js"></script>-->
+        <!--<script src="./js/vnd/stats.min.js"></script>-->
+        <!--<script src="./js/Game.js"></script>-->
+        <!--<script src="./js/Actor.js"></script>-->
+        <!--<script src="./js/Player.js"></script>-->
+        <!--<script src="./js/Monster.js"></script>-->
+        <!--<script>-->
+            <!--window.addEventListener("keydown", function(e) {-->
+                <!--if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {-->
+                    <!--e.preventDefault();-->
+                <!--}-->
+            <!--}, false);-->
+
+            <!--var game = new Game();-->
+
+            <!--game.preload('actors', './images/sprites-characters.png');-->
+            <!--game.preload('actors@2x', './images/sprites-characters-2x.png');-->
+
+            <!--game.preload('tileset', './images/tileset-advance.png');-->
+            <!--game.preload('tileset2', './images/tileset.png');-->
+            <!--game.preload('caves', './images/caves.png');-->
+            <!--game.preload('interior', './images/interior.png');-->
+            <!--game.preload('pokemon', './images/pokemon-sprites.png');-->
+
+            <!--for (var i = 0; i < 1; i++) {-->
+<!--//                game.add('monster', 'mon' + i, {-->
+<!--//                    x: (i % 20) * 32,-->
+<!--//                    y: Math.ceil(i / 20) * 32,-->
+<!--//                    char: i % 154-->
+<!--//                });-->
+
+                <!--game.add('actor', 'npc' + i, {-->
+                    <!--x: 64 + (i % 20) * 32,-->
+                    <!--y: 64 + Math.floor(i / 20) * 64,-->
+                    <!--char: i % 80-->
+                <!--});-->
+            <!--}-->
+
+            <!--game.add('player', 'Robin', {-->
+                <!--x: 64,-->
+                <!--y: 64,-->
+                <!--char: 20-->
+            <!--});-->
+
+            <!--game.ready(function() {-->
+                <!--var canvas = document.getElementById('c');-->
+
+                <!--game.start(canvas);-->
+            <!--});-->
+        <!--</script>-->
+    <!--</head>-->
+    <!--<body>-->
+        <!--<canvas id="c" width="800" height="600">-->
+
+        <!--</canvas>-->
+    <!--</body>-->
+<!--</html>-->
+<!doctype html>
 <html>
-    <head lang="en">
-        <meta charset="UTF-8">
-        <title>Pomo</title>
-        <script src="./js/vnd/keyboard.js"></script>
-        <script src="./js/vnd/stats.min.js"></script>
-        <script src="./js/Game.js"></script>
-        <script src="./js/Actor.js"></script>
-        <script src="./js/Player.js"></script>
-        <script src="./js/Monster.js"></script>
-        <script>
-            window.addEventListener("keydown", function(e) {
-                if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-                    e.preventDefault();
-                }
-            }, false);
-
-            var game = new Game();
-
-            game.preload('actors', './images/sprites-characters.png');
-            game.preload('tileset', './images/tileset-advance.png');
-            game.preload('tileset2', './images/tileset.png');
-            game.preload('caves', './images/caves.png');
-            game.preload('interior', './images/interior.png');
-            game.preload('pokemon', './images/pokemon-sprites.png');
-
-            for (var i = 0; i < 80; i++) {
-    //            game.add('monster', 'mon' + i, {
-    //                x: (i % 20) * 32,
-    //                y: Math.ceil(i / 20) * 32,
-    //                char: i % 154
-    //            });
-
-                game.add('actor', 'npc' + i, {
-                    x: 64 + (i % 20) * 32,
-                    y: 64 + Math.floor(i / 20) * 64,
-                    char: i % 80
-                });
-            }
-
-            game.add('player', 'Robin', {
-                x: 64,
-                y: 64,
-                char: 50
-            });
-
-            game.ready(function() {
-                var canvas = document.getElementById('c');
-
-                game.start(canvas);
-            });
-        </script>
-    </head>
-    <body>
-        <canvas id="c" width="800" height="600">
-
-        </canvas>
-    </body>
+<head>
+    <meta charset="utf-8">
+    <title>Pomo</title>
+</head>
+<body>
+<script type="text/javascript" src="bundle.js" charset="utf-8"></script>
+</body>
 </html>

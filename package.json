@@ -1,4 +1,13 @@
 {
-    "name": "pomo",
-    "version": "0.0.1"
+  "name": "pomo",
+  "version": "0.0.1",
+  "dependencies": {
+    "css-loader": "^0.12.0",
+    "keyboardjs": "^0.4.2",
+    "node-sass": "^2.1.1",
+    "sass-loader": "^0.6.0",
+    "stats.js": "git+ssh://git@github.com/mrdoob/stats.js.git",
+    "style-loader": "^0.12.2",
+    "webpack": "^1.8.11"
+  }
 }

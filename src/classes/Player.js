@@ -1,3 +1,7 @@
+var KeyboardJS = require('keyboardjs');
+
+var Actor = require('./Actor');
+
 function Player(game) {
     this.game = game;
     this.char = 0;
@@ -11,6 +15,8 @@ function Player(game) {
     this.anim = 'idle';
     this.frame = 0;
     this.visible = true;
+
+    this.distance = 16;
 
     this.moving = false;
 
@@ -39,14 +45,20 @@ function Player(game) {
     };
 }
 
-Player.prototype.tick = function(ticks) {
-    var dirgo = [[0, -1], [-1, 0], [0, 1], [1, 0]];
+Player.prototype = new Actor();
+
+Player.prototype.clamp = function(number, min, max) {
+    return Math.max(min, Math.min(number, max));
+};
+
+Player.prototype.tick = function() {
+    this.dirgo = [[0, -1], [-1, 0], [0, 1], [1, 0]];
 
     var keys = KeyboardJS.activeKeys();
 
     var check = ["up", "left", "down", "right"];
 
-    var runWalk = keys.indexOf('shift') > -1 ? 'run' : 'walk';
+    this.runWalk = keys.indexOf('shift') > -1 ? 'run' : 'walk';
 
     if (this.moving === false) {
         if (keys.length > 0) {
@@ -71,11 +83,16 @@ Player.prototype.tick = function(ticks) {
     if (this.moving === true) {
         this.setAnim('walk');
 
-        this.x += dirgo[this.dir][0] * this.speed[runWalk] / 2;
-        this.y += dirgo[this.dir][1] * this.speed[runWalk] / 2;
+        this.x += this.dirgo[this.dir][0] * this.speed[this.runWalk] / 2;
+        this.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
 
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
+
+        this.x = this.clamp(this.x, 0, this.game.canvas.width);
+        this.y = this.clamp(this.y, 0, this.game.canvas.height);
+
+        this.handleCamera();
     } else {
         this.setAnim('idle');
     }
@@ -85,11 +102,27 @@ Player.prototype.tick = function(ticks) {
 
     var d2 = Math.sqrt((dx * dx) + (dy * dy));
 
-    this.status = keys.join(' ') + ' ' + runWalk;
+    this.status = keys.join(' ') + ' ' + this.runWalk;
 
     this.moving = d2 > 0 && d2 < 16;
 
     this.render();
+};
+
+Player.prototype.handleCamera = function() {
+    if (this.x - this.game.camera.x > this.game.canvas.width / (2 * window.devicePixelRatio)) {
+        this.game.camera.x += this.dirgo[this.dir][0] * this.speed[this.runWalk] / 2;
+    }
+
+    if (this.y - this.game.camera.y > this.game.canvas.height / (2 * window.devicePixelRatio)) {
+        this.game.camera.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
+    }
+
+    this.game.camera.x = this.clamp(this.game.camera.x, 0, this.game.map.width);
+    this.game.camera.y = this.clamp(this.game.camera.y, 0, this.game.map.height);
+
+    this.game.camera.x = Math.round(this.game.camera.x);
+    this.game.camera.y = Math.round(this.game.camera.y);
 };
 
 Player.prototype.setAnim = function(anim) {
@@ -99,41 +132,4 @@ Player.prototype.setAnim = function(anim) {
     }
 };
 
-Player.prototype.render = function() {
-    var ctx = this.game.ctx;
-    var ticks = this.game.ticks;
-
-    var sheet = this.anims[this.anim][this.dir];
-
-    var frames = sheet.length;
-
-    if (ticks % 6 === 0) {
-        this.frame = (this.frame + 1) % frames;
-    }
-
-    if (this.frame > frames) {
-        this.frame = frames - 1;
-    }
-
-    var animation = sheet[this.frame];
-
-    var xpos = animation % 3;
-    var ypos = Math.floor(animation / 3);
-
-    var sx = (this.char % 10) * this.sprite.width * 3;
-    var sy = Math.floor(this.char / 10) * this.sprite.height * 4;
-
-    if (this.visible === true) {
-        ctx.drawImage(
-            this.game.images.actors,
-            sx + (xpos * this.sprite.width),
-            sy + (ypos * this.sprite.height),
-            this.sprite.width,
-            this.sprite.height,
-            Math.round(this.x) - (this.sprite.width / 4),
-            Math.round(this.y) - (this.sprite.height / 2),
-            this.sprite.width,
-            this.sprite.height
-        );
-    }
-};
+module.exports = Player;
