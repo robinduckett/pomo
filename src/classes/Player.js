@@ -103,6 +103,8 @@ Player.prototype.tick = function() {
 
     this.moving = d2 > 0 && d2 < 16;
 
+    this.game.context.fillText(this.game.camera.x + ',' + this.game.camera.y, 200, 200);
+
     this.render();
 };
 
@@ -113,6 +115,14 @@ Player.prototype.handleCamera = function() {
 
     if (this.y - this.game.camera.y > this.game.canvas.height / (2 * window.devicePixelRatio)) {
         this.game.camera.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
+    }
+
+    if (this.game.camera.y > 0 && (this.y - this.game.camera.y) < this.game.canvas.height / (2 * window.devicePixelRatio)) {
+        this.game.camera.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
+    }
+
+    if (this.game.camera.x > 0 && (this.x - this.game.camera.x) < this.game.canvas.width / (2 * window.devicePixelRatio)) {
+        this.game.camera.x += this.dirgo[this.dir][0] * this.speed[this.runWalk] / 2;
     }
 
     this.game.camera.x = this.clamp(this.game.camera.x, 0, this.game.map.width * 16 - (this.game.canvas.width / window.devicePixelRatio));
