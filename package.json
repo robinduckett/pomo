@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "css-loader": "^0.12.0",
+    "json-loader": "^0.5.1",
     "keyboardjs": "^0.4.2",
     "node-sass": "^2.1.1",
     "sass-loader": "^0.6.0",

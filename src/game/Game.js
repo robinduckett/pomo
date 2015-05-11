@@ -145,6 +145,9 @@ Game.prototype.start = function() {
 
     document.body.appendChild( this.stats.domElement );
 
+    this.map = require('json!../maps/map.json');
+    console.log(this.map);
+
     requestAnimationFrame(this.render.bind(this));
 };
 

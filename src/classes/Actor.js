@@ -62,13 +62,6 @@ Actor.prototype.tick = function(ticks) {
 
     this.moving = d2 > 0 && d2 < (this.distance - (this.distance % 16));
 
-    this.status = this.dir + ' ' + this.runWalk + ' ' + this.moving.toString();
-    this.game.context.fillText(
-        this.status,
-        this.x - this.game.camera.x,
-        this.y - this.game.camera.y
-    );
-
     this.render();
 };
 

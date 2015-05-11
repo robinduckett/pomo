@@ -89,9 +89,6 @@ Player.prototype.tick = function() {
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
 
-        this.x = this.clamp(this.x, 0, this.game.canvas.width);
-        this.y = this.clamp(this.y, 0, this.game.canvas.height);
-
         this.handleCamera();
     } else {
         this.setAnim('idle');
@@ -118,8 +115,8 @@ Player.prototype.handleCamera = function() {
         this.game.camera.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
     }
 
-    this.game.camera.x = this.clamp(this.game.camera.x, 0, this.game.map.width);
-    this.game.camera.y = this.clamp(this.game.camera.y, 0, this.game.map.height);
+    this.game.camera.x = this.clamp(this.game.camera.x, 0, this.game.map.width * 16 - (this.game.canvas.width / window.devicePixelRatio));
+    this.game.camera.y = this.clamp(this.game.camera.y, 0, this.game.map.height * 16 - (this.game.canvas.height / window.devicePixelRatio));
 
     this.game.camera.x = Math.round(this.game.camera.x);
     this.game.camera.y = Math.round(this.game.camera.y);
