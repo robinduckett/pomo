@@ -28,8 +28,19 @@ function Game() {
 
     this.ticks = 0;
 
+    this.entities();
+
     window.addEventListener('load', this.onload.bind(this), false);
 }
+
+Game.prototype.entities = function() {
+    this._entities = {
+        player: 'Player',
+        monster: 'Monster',
+        actor: 'Actor',
+        npc: 'Npc'
+    };
+};
 
 Game.prototype.onload = function() {
     var percent = ((this.loading - Math.abs(this.loaded + 1)) / this.loading) * 100;
@@ -71,8 +82,6 @@ Game.prototype.updateCanvasScale = function() {
     canvas.style.width = oldWidth + 'px';
     canvas.style.height = oldHeight + 'px';
 
-    console.log('scaling');
-
     context.scale(ratio, ratio);
 };
 
@@ -87,41 +96,15 @@ Game.prototype.preload = function(key, src) {
 };
 
 Game.prototype.add = function(type, name, opts) {
-    switch (type) {
-        case 'player':
-            var player = new Player(this);
-            player.x = opts.x;
-            player.y = opts.y;
-            player.char = opts.char;
-            player.name = name;
+    var Klass = require('../classes/' + this._entities[type]);
 
-            this.actors.push(player);
-            break;
+    var klass = new Klass(this);
+    klass.x = opts.x;
+    klass.y = opts.y;
+    klass.char = opts.char;
+    klass.name = name;
 
-        case 'actor':
-            var actor = new Actor(this);
-
-            actor.x = opts.x;
-            actor.y = opts.y;
-
-            actor.char = opts.char;
-            actor.name = name;
-
-            this.actors.push(actor);
-            break;
-
-        case 'monster':
-            var monster = new Monster(this);
-
-            monster.x = opts.x;
-            monster.y = opts.y;
-
-            monster.char = opts.char;
-            monster.name = name;
-
-            this.actors.push(monster);
-            break;
-    }
+    this.actors.push(klass);
 };
 
 Game.prototype.start = function() {
@@ -145,8 +128,22 @@ Game.prototype.start = function() {
 
     document.body.appendChild( this.stats.domElement );
 
-    this.map = require('json!../maps/map.json');
-    console.log(this.map);
+    var mapJSON = require('json!../maps/map.json');
+
+    this.map.width = mapJSON.width;
+    this.map.height = mapJSON.height;
+
+    var overMap = mapJSON.layers[2];
+
+    this.blockMap = mapJSON.layers[1];
+
+    mapJSON.layers.splice(2);
+
+    this.mapBuffer = this.renderMap(mapJSON);
+
+    mapJSON.layers = [overMap];
+
+    this.overMapBuffer = this.renderMap(mapJSON);
 
     requestAnimationFrame(this.render.bind(this));
 };
@@ -168,8 +165,6 @@ Game.prototype.render = function() {
             this.retina = this.isRetina();
 
             this.updateCanvasScale();
-
-            console.log('Updating scale');
         }
 
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -177,11 +172,13 @@ Game.prototype.render = function() {
         this.ticks ++;
         this.then = now - (delta % interval);
 
-        this.renderMap();
+        this.drawMap(this.mapBuffer);
 
         this.actors.forEach(function(item) {
             item.tick(this.ticks);
         }.bind(this));
+
+        this.drawMap(this.overMapBuffer);
     }
 
     this.stats.end();
@@ -189,38 +186,67 @@ Game.prototype.render = function() {
     requestAnimationFrame(this.render.bind(this));
 };
 
-Game.prototype.renderMap = function() {
-    this.map.width = 100;
-    this.map.height = 100;
-
-    this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
-
-    for (var x = 0; x < this.map.width * 16; x += 16) {
-
-        this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
-
-        if (x % 32 === 0) {
-            this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
+Game.prototype.renderMap = function(mapJSON) {
+    var tileset = {
+        image: {
+            src: this.images[mapJSON.tilesets[0].name],
+            width: mapJSON.tilesets[0].imagewidth,
+            height: mapJSON.tilesets[0].imageheight
+        },
+        width: mapJSON.tilesets[0].imagewidth / mapJSON.tilesets[0].tilewidth,
+        height: mapJSON.tilesets[0].imageheight / mapJSON.tilesets[0].tileheight,
+        tile: {
+            width: mapJSON.tilesets[0].tilewidth,
+            height: mapJSON.tilesets[0].tileheight
         }
+    };
 
-        this.context.beginPath();
-        this.context.moveTo(x - 0.5 - this.camera.x, 0);
-        this.context.lineTo(x - 0.5 - this.camera.x, this.map.height * 100);
-        this.context.stroke();
+    var map = document.createElement('canvas');
+    map.width = mapJSON.width * tileset.tile.width;
+    map.height = mapJSON.height * tileset.tile.height;
+
+    var mapCtx = map.getContext('2d');
+    var l = 0;
+
+    for (var l = 0; l < mapJSON.layers.length; l++) {
+        for (var i = 0; i < mapJSON.width * mapJSON.height; i ++) {
+            var x = i % mapJSON.width;
+            var y = Math.floor(i / mapJSON.width);
+
+            var t = mapJSON.layers[l].data[i] - 1;
+
+            if (t < 0) {
+                continue;
+            }
+
+            var tx = t % tileset.width;
+            var ty = Math.floor(t / tileset.width);
+
+            var tw = tileset.tile.width, th = tileset.tile.height
+
+            mapCtx.drawImage(
+                tileset.image.src,
+                tx * tw, ty * th,
+                tw, th,
+                x * tw, y * th,
+                tw, th
+            );
+        }
     }
 
-    for (var y = 0; y < this.map.height * 16; y += 16) {
-        this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
+    return map;
+};
 
-        if (y % 32 === 0) {
-            this.context.strokeStyle = 'rgba(0, 0, 0, 1)';
-        }
-
-        this.context.beginPath();
-        this.context.moveTo(0, y - 0.5 - this.camera.y);
-        this.context.lineTo(this.map.width * 100, y - 0.5 - this.camera.y);
-        this.context.stroke();
-    }
+Game.prototype.drawMap = function(map) {
+    this.context.drawImage(map, 
+        this.camera.x, 
+        this.camera.y, 
+        this.canvas.width, 
+        this.canvas.height,
+        0, 0,
+        this.canvas.width, 
+        this.canvas.height
+    );
 };
 
 Game.prototype.ready = function(done) {
