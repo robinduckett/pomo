@@ -16,19 +16,6 @@ var monsters = [0, 4, 7, 26];
 var npcs = [];
 var pos = 0;
 
-// for (var i = 0; i < 150; i++) {
-//     monsters.push(i);
-// }
-
-// monsters.forEach(function(i) {
-//     pos++;
-//     game.add('monster', 'mon' + i, {
-//         x: 64 + (pos % 20) * 32,
-//         y: 64 + Math.floor(pos / 20) * 64,
-//         char: i % 80
-//     });
-// });
-
 pos = 0;
 
 for (var i = 0; i < 100; i++) {
@@ -38,15 +25,17 @@ for (var i = 0; i < 100; i++) {
 npcs.forEach(function(i) {
     pos++;
     game.add('npc', 'npc' + i, {
-        x: 64 + (pos % 46) * 32 * 10,
-        y: 64 + Math.floor(pos / 46) * 32 * 10,
+        x: 64 + (pos % 5) * 32 * 10,
+        y: 64 + Math.floor(pos / 5) * 32 * 10,
         char: i % 80
     });
 });
 
+game.add('levelEditor', 'LevelEditor');
+
 game.add('player', 'Robin', {
     x: 64,
-    y: 64,
+    y: 28 * 16,
     char: 50
 });
 

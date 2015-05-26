@@ -47,7 +47,11 @@ function Player(game) {
 
 Player.prototype = new Actor();
 
-Player.prototype.tick = function() {
+Player.prototype.tick = function(ticks) {
+    if (ticks === 1) {
+        this.game.setCamera(this.x, this.y);
+    }
+
     this.dirgo = [[0, -1], [-1, 0], [0, 1], [1, 0]];
 
     var keys = KeyboardJS.activeKeys();

@@ -38,7 +38,9 @@ Game.prototype.entities = function() {
         player: 'Player',
         monster: 'Monster',
         actor: 'Actor',
-        npc: 'Npc'
+        npc: 'Npc',
+
+        levelEditor: 'LevelEditor'
     };
 };
 
@@ -99,9 +101,13 @@ Game.prototype.add = function(type, name, opts) {
     var Klass = require('../classes/' + this._entities[type]);
 
     var klass = new Klass(this);
-    klass.x = opts.x;
-    klass.y = opts.y;
-    klass.char = opts.char;
+
+    for (var prop in opts) {
+        if (opts.hasOwnProperty(prop)) {
+            klass[prop] = opts[prop];
+        }
+    }
+
     klass.name = name;
 
     this.actors.push(klass);
@@ -134,16 +140,25 @@ Game.prototype.start = function() {
     this.map.height = mapJSON.height;
 
     var overMap = mapJSON.layers[2];
-
     this.blockMap = mapJSON.layers[1];
 
     mapJSON.layers.splice(2);
-
     this.mapBuffer = this.renderMap(mapJSON);
 
     mapJSON.layers = [overMap];
-
     this.overMapBuffer = this.renderMap(mapJSON);
+
+    this.before = this.actors.filter(function(item) {
+        return typeof item.beforeRender !== 'undefined';
+    });
+
+    this.tickers = this.actors.filter(function(item) {
+        return typeof item.tick !== 'undefined';
+    });
+
+    this.after = this.actors.filter(function(item) {
+        return typeof item.afterRender !== 'undefined';
+    });
 
     requestAnimationFrame(this.render.bind(this));
 };
@@ -169,21 +184,24 @@ Game.prototype.render = function() {
 
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        if (this.canvas.width > this.mapBuffer.width || this.canvas.height > this.mapBuffer.height) {
-            this.context.fillStyle = '#000';
-            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        }
-
         this.ticks ++;
         this.then = now - (delta % interval);
 
+        this.before.forEach(function(item) {
+            item.beforeRender();
+        }.bind(this));
+
         this.drawMap(this.mapBuffer);
 
-        this.actors.forEach(function(item) {
+        this.tickers.forEach(function(item) {
             item.tick(this.ticks);
         }.bind(this));
 
         this.drawMap(this.overMapBuffer);
+
+        this.after.forEach(function(item) {
+            item.afterRender();
+        }.bind(this));
     }
 
     this.stats.end();
@@ -215,8 +233,8 @@ Game.prototype.setCamera = function(x, y) {
         this.camera.y = y - middle;
     }
 
-    this.camera.x = this.clamp(this.camera.x, 0, this.map.width * 16 - (this.canvas.width / window.devicePixelRatio));
-    this.camera.y = this.clamp(this.camera.y, 0, this.map.height * 16 - (this.canvas.height / window.devicePixelRatio));
+    this.camera.x = this.clamp(this.camera.x, 0, this.map.width * this.map.tileset.tile.width - (this.canvas.width / window.devicePixelRatio));
+    this.camera.y = this.clamp(this.camera.y, 0, this.map.height * this.map.tileset.tile.height - (this.canvas.height / window.devicePixelRatio));
 
     this.camera.x = Math.round(this.camera.x);
     this.camera.y = Math.round(this.camera.y);
@@ -236,6 +254,10 @@ Game.prototype.renderMap = function(mapJSON) {
             height: mapJSON.tilesets[0].tileheight
         }
     };
+
+    if (!this.map.tileset) {
+        this.map.tileset = tileset;
+    }
 
     var map = document.createElement('canvas');
     map.width = mapJSON.width * tileset.tile.width;
