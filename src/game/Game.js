@@ -72,9 +72,6 @@ Game.prototype.updateCanvasScale = function() {
 
         ratio = devicePixelRatio / backingStoreRatio;
 
-    //var oldWidth = canvas.width;
-    //var oldHeight = canvas.height;
-
     var oldWidth = window.innerWidth;
     var oldHeight = window.innerHeight - 30;
 
@@ -158,6 +155,13 @@ Game.prototype.start = function() {
 
     this.after = this.actors.filter(function(item) {
         return typeof item.afterRender !== 'undefined';
+    });
+
+    this.actors.filter(function(item) {
+        return typeof item.load !== 'undefined';
+    }).forEach(function(item) {
+        console.log(item);
+        item.load();
     });
 
     requestAnimationFrame(this.render.bind(this));

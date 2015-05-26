@@ -20,20 +20,23 @@ LevelEditor.prototype.handleMouseClick = function(evt) {
 };
 
 LevelEditor.prototype.screenToMap = function(x, y) {
+    var tile = this.game.map.tileset.tile,
+        camera = this.game.camera;
+
     var screen = {
-        x: Math.floor(x / this.game.map.tileset.tile.width),
-        y: Math.floor(y / this.game.map.tileset.tile.height)
+        x: Math.floor(x / tile.width),
+        y: Math.floor(y / tile.height)
     };
 
     return {
         screen: screen,
         level: {
-            x: screen.x + Math.floor(this.game.camera.x / this.game.map.tileset.tile.width),
-            y: screen.y + Math.floor(this.game.camera.y / this.game.map.tileset.tile.height),
+            x: screen.x + Math.floor(camera.x / tile.width),
+            y: screen.y + Math.floor(camera.y / tile.height),
         },
         canvas: {
-            x: (screen.x * this.game.map.tileset.tile.width) - (this.game.camera.x % this.game.map.tileset.tile.width),
-            y: (screen.y * this.game.map.tileset.tile.height) - (this.game.camera.y % this.game.map.tileset.tile.height),
+            x: (screen.x * tile.width) - (camera.x % tile.width),
+            y: (screen.y * tile.height) - (camera.y % tile.height),
         }
     };
 };
@@ -46,26 +49,30 @@ LevelEditor.prototype.mapToScreen = function(x, y) {
 };
 
 LevelEditor.prototype.render = function() {
+
+};
+
+LevelEditor.prototype.load = function() {
+    this.game.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+    this.game.canvas.addEventListener('click', this.handleMouseClick.bind(this));
 };
 
 LevelEditor.prototype.tick = function(ticks) {
-    if (ticks === 1) {
-        this.game.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        this.game.canvas.addEventListener('click', this.handleMouseClick.bind(this));
-    }
+    this.render();
 };
 
 LevelEditor.prototype.afterRender = function() {
-    var pos = this.screenToMap(this.mousex, this.mousey);
+    var pos = this.screenToMap(this.mousex, this.mousey)
+        ctx = this.game.context;
 
-    this.game.context.save();
+    ctx.save();
 
-    this.game.context.strokeRect(pos.canvas.x, pos.canvas.y, 16, 16);
-    this.game.context.textAlign = 'center';
+    ctx.strokeRect(pos.canvas.x, pos.canvas.y, 16, 16);
+    ctx.textAlign = 'center';
 
-    this.game.context.strokeText(pos.level.x + 'x' + pos.level.y, pos.canvas.x + 8, pos.canvas.y + 32);
+    ctx.strokeText(pos.level.x + 'x' + pos.level.y, pos.canvas.x + 8, pos.canvas.y + 32);
 
-    this.game.context.restore();
+    ctx.restore();
 };
 
 module.exports = LevelEditor;
