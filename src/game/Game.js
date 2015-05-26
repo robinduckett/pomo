@@ -169,6 +169,11 @@ Game.prototype.render = function() {
 
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+        if (this.canvas.width > this.mapBuffer.width || this.canvas.height > this.mapBuffer.height) {
+            this.context.fillStyle = '#000';
+            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
         this.ticks ++;
         this.then = now - (delta % interval);
 
@@ -184,6 +189,37 @@ Game.prototype.render = function() {
     this.stats.end();
 
     requestAnimationFrame(this.render.bind(this));
+};
+
+Game.prototype.clamp = function(number, min, max) {
+    return Math.max(min, Math.min(number, max));
+};
+
+Game.prototype.setCamera = function(x, y) {
+    var center = this.canvas.width / (2 * window.devicePixelRatio),
+        middle = this.canvas.height / (2 * window.devicePixelRatio);
+
+    if (x - this.camera.x > center) {
+        this.camera.x = x - center;
+    }
+
+    if (this.camera.x > 0 && (x - this.camera.x) < center) {
+        this.camera.x = x - center;
+    }
+
+    if (y - this.camera.y > middle) {
+        this.camera.y = y - middle;
+    }
+
+    if (this.camera.y > 0 && (y - this.camera.y) < middle) {
+        this.camera.y = y - middle;
+    }
+
+    this.camera.x = this.clamp(this.camera.x, 0, this.map.width * 16 - (this.canvas.width / window.devicePixelRatio));
+    this.camera.y = this.clamp(this.camera.y, 0, this.map.height * 16 - (this.canvas.height / window.devicePixelRatio));
+
+    this.camera.x = Math.round(this.camera.x);
+    this.camera.y = Math.round(this.camera.y);
 };
 
 Game.prototype.renderMap = function(mapJSON) {
@@ -238,13 +274,13 @@ Game.prototype.renderMap = function(mapJSON) {
 };
 
 Game.prototype.drawMap = function(map) {
-    this.context.drawImage(map, 
-        this.camera.x, 
-        this.camera.y, 
-        this.canvas.width, 
+    this.context.drawImage(map,
+        this.camera.x,
+        this.camera.y,
+        this.canvas.width,
         this.canvas.height,
         0, 0,
-        this.canvas.width, 
+        this.canvas.width,
         this.canvas.height
     );
 };

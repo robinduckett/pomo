@@ -47,10 +47,6 @@ function Player(game) {
 
 Player.prototype = new Actor();
 
-Player.prototype.clamp = function(number, min, max) {
-    return Math.max(min, Math.min(number, max));
-};
-
 Player.prototype.tick = function() {
     this.dirgo = [[0, -1], [-1, 0], [0, 1], [1, 0]];
 
@@ -89,7 +85,7 @@ Player.prototype.tick = function() {
         this.x = Math.round(this.x);
         this.y = Math.round(this.y);
 
-        this.handleCamera();
+        this.game.setCamera(this.x, this.y);
     } else {
         this.setAnim('idle');
     }
@@ -103,33 +99,11 @@ Player.prototype.tick = function() {
 
     this.moving = d2 > 0 && d2 < 16;
 
-    this.game.context.fillText(this.game.camera.x + ',' + this.game.camera.y, 200, 200);
+    var dp = this.game.canvas.width / (2 * window.devicePixelRatio);
+
+    this.game.context.fillText(dp + '\n' + this.game.camera.x + ',' + this.game.camera.y + ' ' + this.x + ', ' + this.y + ' ' + (this.x/16) + ', ' + (this.y/16), 200, 200);
 
     this.render();
-};
-
-Player.prototype.handleCamera = function() {
-    if (this.x - this.game.camera.x > this.game.canvas.width / (2 * window.devicePixelRatio)) {
-        this.game.camera.x += this.dirgo[this.dir][0] * this.speed[this.runWalk] / 2;
-    }
-
-    if (this.y - this.game.camera.y > this.game.canvas.height / (2 * window.devicePixelRatio)) {
-        this.game.camera.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
-    }
-
-    if (this.game.camera.y > 0 && (this.y - this.game.camera.y) < this.game.canvas.height / (2 * window.devicePixelRatio)) {
-        this.game.camera.y += this.dirgo[this.dir][1] * this.speed[this.runWalk] / 2;
-    }
-
-    if (this.game.camera.x > 0 && (this.x - this.game.camera.x) < this.game.canvas.width / (2 * window.devicePixelRatio)) {
-        this.game.camera.x += this.dirgo[this.dir][0] * this.speed[this.runWalk] / 2;
-    }
-
-    this.game.camera.x = this.clamp(this.game.camera.x, 0, this.game.map.width * 16 - (this.game.canvas.width / window.devicePixelRatio));
-    this.game.camera.y = this.clamp(this.game.camera.y, 0, this.game.map.height * 16 - (this.game.canvas.height / window.devicePixelRatio));
-
-    this.game.camera.x = Math.round(this.game.camera.x);
-    this.game.camera.y = Math.round(this.game.camera.y);
 };
 
 Player.prototype.setAnim = function(anim) {
